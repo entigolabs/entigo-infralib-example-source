@@ -2,12 +2,16 @@
 
 The smallest complete repository of [Entigo Infralib](https://github.com/entigolabs/entigo-infralib) modules, tested and released with [entigo-infralib-test](https://github.com/entigolabs/entigo-infralib-test). Copy it to start a module repository of your own, or read it to see how the pieces fit.
 
-It holds two modules:
+It holds two modules, tested on two environments:
 
-- `modules/aws/hello-world`, an OpenTofu module with one output,
-- `modules/k8s/hello-world`, a Helm chart served through the platform's gateway.
+- `modules/aws/hello-world`, an OpenTofu module with one output. It greets with "Hello" on `aws_biz` and, through its input file, with "Tere" on `aws_pri`.
+- `modules/k8s/hello-world`, a Helm chart. Public through the platform's gateway on `aws_biz`, internal only on `aws_pri`.
 
-Two modules do not make a platform. `environments.yaml` therefore lists the network, cluster, ArgoCD, gateway and DNS modules of the released [entigo-infralib](https://github.com/entigolabs/entigo-infralib-release) as *external* modules of the same steps, with their inputs under `environments/aws_demo/`. The agent provisions all of it with one configuration; this repository's modules are tested on top.
+Each module has one input file and one test function per environment (`env.RunEach`), and the environments' tests run in parallel. That is the shape entigo-infralib's own biz and pri scenarios take.
+
+Two modules do not make a platform. `environments.yaml` therefore lists the network, cluster, ArgoCD, gateway and DNS modules of the released [entigo-infralib](https://github.com/entigolabs/entigo-infralib-release) as *external* modules of the same steps, with their inputs under `environments/<env>/`. The agent provisions all of it with one configuration per environment; this repository's modules are tested on top.
+
+The environments live in the entigo-infralib AWS test account next to its own biz and pri, so they use the prefixes `exbiz` and `expri`.
 
 Releases of this repository go to [entigo-infralib-example-release](https://github.com/entigolabs/entigo-infralib-example-release), the way entigo-infralib releases go to entigo-infralib-release.
 
@@ -15,9 +19,10 @@ Releases of this repository go to [entigo-infralib-example-release](https://gith
 
 ```
 environments.yaml              environments, steps, the external source
-environments/aws_demo/         agent inputs of the external modules, per step
-modules/aws/hello-world/       module + test/aws_demo.yaml (input) + test/*_test.go
-modules/k8s/hello-world/       chart  + test/aws_demo.yaml (input) + test/*_test.go
+environments/aws_biz/          agent inputs of the external modules, per step
+environments/aws_pri/
+modules/aws/hello-world/       module + test/aws_{biz,pri}.yaml (inputs) + test/*_test.go
+modules/k8s/hello-world/       chart  + test/aws_{biz,pri}.yaml (inputs) + test/*_test.go
 go.mod                         requires github.com/entigolabs/entigo-infralib-test
 test.sh                        bootstrap of the orchestrator, pins the framework version
 .github/workflows/             calls the framework's reusable workflows
@@ -28,13 +33,14 @@ test.sh                        bootstrap of the orchestrator, pins the framework
 With AWS credentials in your shell:
 
 ```
-./test.sh                          provision aws_demo and test both modules
+./test.sh                          provision aws_biz and aws_pri and test both modules on both
+./test.sh --env aws_pri            one environment only
 ./test.sh modules/k8s/hello-world  test one module in a step of its own
 ./test.sh --help
 ```
 
-The kubeconfig is yours to provide, for example `aws eks update-kubeconfig --region eu-north-1 --name demo-infra-eks`; the test only picks the `kube_context` named in `environments.yaml`.
+The kubeconfig is yours to provide, for example `aws eks update-kubeconfig --region eu-north-1 --name exbiz-infra-eks`; the test only picks the `kube_context` named in `environments.yaml`.
 
 ## Status
 
-Scaffolding, not yet run against AWS. The first real run will settle the external module inputs under `environments/aws_demo/`.
+Scaffolding, not yet run against AWS. The first real run will settle the external module inputs under `environments/`.

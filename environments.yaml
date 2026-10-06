@@ -1,37 +1,54 @@
 # The environments this repository is tested on. See
 # https://github.com/entigolabs/entigo-infralib-test#environmentsyaml
 #
+# Two scenarios, the way entigo-infralib tests its modules on biz and pri:
+# aws_biz exposes workloads publicly, aws_pri keeps them internal. Both live
+# in the entigo-infralib AWS test account next to its own biz and pri
+# environments, hence the distinct prefixes.
+#
 # This repository holds two hello-world modules. Everything else that makes a
 # platform (network, cluster, ArgoCD, gateway, DNS) is an external module from
 # the released entigo-infralib, with its inputs under environments/<env>/.
 sources:
   - url: https://github.com/entigolabs/entigo-infralib-release
 environments:
-  aws_demo:
+  aws_biz:
     cloud: aws
-    prefix: demo
+    prefix: exbiz
     region: eu-north-1
-    kube_context: arn:aws:eks:eu-north-1:877483565445:cluster/demo-infra-eks
+    kube_context: arn:aws:eks:eu-north-1:877483565445:cluster/exbiz-infra-eks
     gateways:
       # The public gateway of the aws-alb module; hostnames are <namespace>.<domain>,
       # domain being the route53 module's pub_domain.
-      external: {name: external, namespace: aws-alb-demo, domain: demo-net-route53.infralib.entigo.io}
+      external: {name: external, namespace: aws-alb-exbiz, domain: exbiz-net-route53.infralib.entigo.io}
     steps:
       - name: net
-        modules:
-          - aws/vpc
-          - aws-v2/route53
-          - aws/hello-world
+        modules: [aws/vpc, aws-v2/route53, aws/hello-world]
       - name: infra
         vpc: {attach: true}
-        modules:
-          - aws/eks
+        modules: [aws/eks]
       - name: apps
         type: argocd-apps
-        argocd_namespace: argocd-demo
+        argocd_namespace: argocd-exbiz
         default_modules: [aws-alb]
-        modules:
-          - argocd
-          - aws-alb
-          - external-dns
+        modules: [argocd, aws-alb, external-dns]
+        modules_dir: modules/k8s
+  aws_pri:
+    cloud: aws
+    prefix: expri
+    region: eu-north-1
+    kube_context: arn:aws:eks:eu-north-1:877483565445:cluster/expri-infra-eks
+    gateways:
+      external: {name: external, namespace: aws-alb-expri, domain: expri-net-route53.infralib.entigo.io}
+    steps:
+      - name: net
+        modules: [aws/vpc, aws-v2/route53, aws/hello-world]
+      - name: infra
+        vpc: {attach: true}
+        modules: [aws/eks]
+      - name: apps
+        type: argocd-apps
+        argocd_namespace: argocd-expri
+        default_modules: [aws-alb]
+        modules: [argocd, aws-alb, external-dns]
         modules_dir: modules/k8s

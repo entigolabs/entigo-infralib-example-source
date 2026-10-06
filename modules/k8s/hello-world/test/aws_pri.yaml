@@ -1,0 +1,3 @@
+# Internal: no route, reachable inside the cluster only.
+httpRoute:
+  enabled: false

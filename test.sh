@@ -10,7 +10,7 @@
 #   ./test.sh --help                   every command and option
 set -euo pipefail
 
-INFRALIB_TEST_VERSION="${INFRALIB_TEST_VERSION:-v0.1.0}"
+INFRALIB_TEST_VERSION="${INFRALIB_TEST_VERSION:-v0.2.0}"
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 PREFIX="${INFRALIB_TEST_IMAGE_PREFIX:-entigolabs/entigo-infralib-test-}"
