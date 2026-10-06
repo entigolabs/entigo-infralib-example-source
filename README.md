@@ -21,8 +21,8 @@ Releases of this repository go to [entigo-infralib-example-release](https://gith
 environments.yaml              environments, steps, the external source
 environments/aws_biz/          agent inputs of the external modules, per step
 environments/aws_pri/
-modules/aws/hello-world/       module + test/aws_{biz,pri}.yaml (inputs) + test/*_test.go
-modules/k8s/hello-world/       chart  + test/aws_{biz,pri}.yaml (inputs) + test/*_test.go
+modules/aws/hello-world/       module + test.sh + test/aws_{biz,pri}.yaml (inputs) + test/*_test.go
+modules/k8s/hello-world/       chart  + test.sh + test/aws_{biz,pri}.yaml (inputs) + test/*_test.go
 go.mod                         requires github.com/entigolabs/entigo-infralib-test
 test.sh                        bootstrap of the orchestrator, pins the framework version
 .github/workflows/             calls the framework's reusable workflows
@@ -36,6 +36,7 @@ With AWS credentials in your shell:
 ./test.sh                          provision aws_biz and aws_pri and test both modules on both
 ./test.sh --env aws_pri            one environment only
 ./test.sh modules/k8s/hello-world  test one module in a step of its own
+modules/k8s/hello-world/test.sh    the same, from the module's directory
 ./test.sh --help
 ```
 
