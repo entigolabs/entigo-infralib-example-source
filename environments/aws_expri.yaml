@@ -1,0 +1,109 @@
+# Agent configuration of the aws_expri environment: cloud aws, prefix expri, both
+# from the file name. The framework runs the agent with a patched copy: this
+# repository as first source, module names and the inputs of this
+# repository's modules filled in, and in a pull request the module under test
+# appended as a step of its own.
+#
+# This repository holds two hello-world modules; their inputs live in
+# modules/*/hello-world/test/aws_expri.yaml. Everything else that makes a
+# platform (network, cluster, ArgoCD, gateway, DNS) comes from the released
+# entigo-infralib, with its inputs inline.
+#
+# Region comes from AWS_REGION, as for the agent. The environment lives in
+# the entigo-infralib AWS test account next to its own biz and pri.
+sources:
+  - url: https://github.com/entigolabs/entigo-infralib-release
+steps:
+  - name: net
+    type: terraform
+    modules:
+      - name: vpc
+        source: aws/vpc
+        inputs:
+          vpc_cidr: "10.151.0.0/16"
+          one_nat_gateway_per_az: false
+          private_subnets: |
+            ["10.151.32.0/21", "10.151.40.0/21"]
+          public_subnets: |
+            ["10.151.4.0/24", "10.151.5.0/24"]
+          database_subnets: |
+            []
+          elasticache_subnets: |
+            []
+          intra_subnets: |
+            []
+      - name: route53
+        source: aws-v2/route53
+        inputs:
+          domains: |
+            {
+              "public" = {
+                domain_name    = "{{ .config.prefix }}-{{ .step.name }}-{{ .module.name }}.infralib.entigo.io"
+                parent_zone_id = "Z07983041XRLSLZUTHHDY"
+              }
+            }
+      - name: hello-world
+        source: aws/hello-world
+  - name: infra
+    type: terraform
+    vpc:
+      attach: true
+    modules:
+      - name: eks
+        source: aws/eks
+        inputs:
+          eks_cluster_public: true
+          enable_cluster_creator_admin_permissions: false
+          eks_main_min_size: 1
+          eks_main_max_size: 3
+          eks_main_capacity_type: "SPOT"
+          eks_main_subnets: |
+            ["{{ .toutput.vpc.private_subnets[0] }}"]
+          eks_tools_min_size: 1
+          eks_tools_max_size: 2
+          eks_tools_capacity_type: "SPOT"
+          eks_mon_capacity_type: "SPOT"
+          eks_mon_subnets: |
+            ["{{ .toutput.vpc.private_subnets[0] }}"]
+          cluster_enabled_log_types: |
+            []
+  - name: apps
+    type: argocd-apps
+    argocd_namespace: argocd-expri
+    modules:
+      - name: argocd-expri
+        source: argocd
+        inputs:
+          argocd:
+            repoServer:
+              autoscaling:
+                maxReplicas: 1
+            server:
+              httproute:
+                hostnames:
+                  - "{{ .module.name }}.{{ .toutput.route53.pub_domain }}"
+            global:
+              domain: |
+                {{ .module.name }}.{{ .toutput.route53.pub_domain }}
+      - name: aws-alb-expri
+        source: aws-alb
+        inputs:
+          global:
+            routingResources: "httproute"
+            createIngress: false
+            createRoute: true
+            createType: route
+          gateways:
+            internal:
+              enabled: false
+            service:
+              enabled: false
+      - name: external-dns-expri
+        source: external-dns
+        inputs:
+          external-dns:
+            extraArgs:
+              - "--metrics-address=:7979"
+              - "--zone-id-filter={{ .toutput.route53.pub_zone_id }}"
+      - name: hello-world-expri
+        source: hello-world

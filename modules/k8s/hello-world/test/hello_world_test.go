@@ -14,13 +14,14 @@ import (
 // One test per environment; they run in parallel.
 func TestHelloWorld(t *testing.T) {
 	env.RunEach(t, map[string]env.TestFunc{
-		"aws_biz": testHelloWorldPublic,
-		"aws_pri": testHelloWorldInternal,
+		"aws_exbiz": testHelloWorldPublic,
+		"aws_expri": testHelloWorldInternal,
 	})
 }
 
-// aws_biz: deployed and reachable through the external gateway, with the
-// gateway address pinned so the check does not wait for public DNS.
+// aws_exbiz: deployed and reachable through the external gateway (derived
+// from the aws-alb and route53 modules of the environment), with the gateway
+// address pinned so the check does not wait for public DNS.
 func testHelloWorldPublic(t *testing.T, e *env.Environment) {
 	c := k8s.Connect(t, e)
 	k8s.WaitUntilDeploymentAvailable(t, c, c.Namespace, 20, 6*time.Second)
@@ -28,12 +29,12 @@ func testHelloWorldPublic(t *testing.T, e *env.Environment) {
 	_, err := k8s.WaitUntilK8SHTTPRouteAvailable(t, c, c.Namespace, 20, 6*time.Second)
 	require.NoError(t, err, "HTTPRoute %s not accepted", c.Namespace)
 
-	gateway := e.Gateway(t, "external")
+	gateway := k8s.Gateway(t, e, "external")
 	err = k8s.WaitUntilHostnameAvailable(t, c, gateway, "https://"+gateway.Hostname(c.Namespace), "200", gateway.Retries, 6*time.Second)
 	require.NoError(t, err)
 }
 
-// aws_pri: deployed, and deliberately not exposed.
+// aws_expri: deployed, and deliberately not exposed.
 func testHelloWorldInternal(t *testing.T, e *env.Environment) {
 	c := k8s.Connect(t, e)
 	k8s.WaitUntilDeploymentAvailable(t, c, c.Namespace, 20, 6*time.Second)

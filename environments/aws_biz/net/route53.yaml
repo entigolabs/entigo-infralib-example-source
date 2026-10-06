@@ -1,7 +1,0 @@
-domains: |
-  {
-    "public" = {
-      domain_name    = "{{ .config.prefix }}-{{ .step.name }}-{{ .module.name }}.infralib.entigo.io"
-      parent_zone_id = "Z07983041XRLSLZUTHHDY"
-    }
-  }

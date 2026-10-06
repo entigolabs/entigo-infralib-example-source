@@ -14,8 +14,8 @@ import (
 // One test per environment; they run in parallel.
 func TestHelloWorld(t *testing.T) {
 	env.RunEach(t, map[string]env.TestFunc{
-		"aws_biz": testHelloWorldBiz,
-		"aws_pri": testHelloWorldPri,
+		"aws_exbiz": testHelloWorldBiz,
+		"aws_expri": testHelloWorldPri,
 	})
 }
 
@@ -23,7 +23,7 @@ func testHelloWorldBiz(t *testing.T, e *env.Environment) {
 	assert.Equal(t, greeting(t, e, "Hello"), tf.Get(t, e).String(t, "hello-world__hello_world"))
 }
 
-// aws_pri.yaml sets greeting: Tere.
+// aws_expri.yaml sets greeting: Tere.
 func testHelloWorldPri(t *testing.T, e *env.Environment) {
 	assert.Equal(t, greeting(t, e, "Tere"), tf.Get(t, e).String(t, "hello-world__hello_world"))
 }
