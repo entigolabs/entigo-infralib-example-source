@@ -6,11 +6,14 @@
 #
 # This repository holds two hello-world modules; their inputs live in
 # modules/*/hello-world/test/aws_exbiz.yaml. Everything else that makes a
-# platform (network, cluster, ArgoCD, gateway, DNS) comes from the released
-# entigo-infralib, with its inputs inline.
+# platform comes from the released entigo-infralib with its inputs inline,
+# kept to what the example needs: the vpc calculates its subnets from the
+# cidr, argocd and hello-world derive their hostnames from the route53 zone,
+# aws-alb and external-dns need crossplane and crossplane-aws to function.
 #
 # Region comes from AWS_REGION, as for the agent. The environment lives in
-# the entigo-infralib AWS test account next to its own biz and pri.
+# the entigo-infralib AWS test account next to its own biz and pri, so the
+# prefix and the cidr are its own.
 sources:
   - url: https://github.com/entigolabs/entigo-infralib-release
 steps:
@@ -20,26 +23,17 @@ steps:
       - name: vpc
         source: aws/vpc
         inputs:
-          vpc_cidr: "10.150.0.0/16"
-          one_nat_gateway_per_az: false
-          private_subnets: |
-            ["10.150.32.0/21", "10.150.40.0/21"]
-          public_subnets: |
-            ["10.150.4.0/24", "10.150.5.0/24"]
-          database_subnets: |
-            []
-          elasticache_subnets: |
-            []
-          intra_subnets: |
-            []
+          vpc_cidr: "10.160.0.0/16"
       - name: route53
         source: aws-v2/route53
         inputs:
           domains: |
             {
-              "public" = {
-                domain_name    = "{{ .config.prefix }}-{{ .step.name }}-{{ .module.name }}.infralib.entigo.io"
-                parent_zone_id = "Z07983041XRLSLZUTHHDY"
+              "exbiz" = {
+                domain_name     = "{{ .config.prefix }}-{{ .step.name }}-{{ .module.name }}.infralib.entigo.io"
+                parent_zone_id  = "Z07983041XRLSLZUTHHDY"
+                default_private = true
+                default_public  = true
               }
             }
       - name: hello-world
@@ -67,6 +61,8 @@ steps:
             ["{{ .toutput.vpc.private_subnets[0] }}"]
           cluster_enabled_log_types: |
             []
+      - name: crossplane
+        source: aws/crossplane
   - name: apps
     type: argocd-apps
     argocd_namespace: argocd-exbiz
@@ -75,29 +71,34 @@ steps:
         source: argocd
         inputs:
           argocd:
+            dex:
+              enabled: false
             repoServer:
               autoscaling:
                 maxReplicas: 1
-            server:
-              httproute:
-                hostnames:
-                  - "{{ .module.name }}.{{ .toutput.route53.pub_domain }}"
-            global:
-              domain: |
-                {{ .module.name }}.{{ .toutput.route53.pub_domain }}
+            configs:
+              params:
+                server.dex.server: ""
+      - name: crossplane-system
+        source: crossplane-core
+      - name: crossplane-aws
+        source: crossplane-aws
+        inputs:
+          global:
+            createObservers: true
+            createNamespacedObservers: true
       - name: aws-alb-exbiz
         source: aws-alb
         inputs:
+          ingressClass:
+            service:
+              enabled: false
           global:
-            routingResources: "httproute"
+            routingResources: "both"
             createIngress: false
             createRoute: true
             createType: route
-          gateways:
-            internal:
-              enabled: false
-            service:
-              enabled: false
+            internalGateway: external
       - name: external-dns-exbiz
         source: external-dns
         inputs:
@@ -105,5 +106,6 @@ steps:
             extraArgs:
               - "--metrics-address=:7979"
               - "--zone-id-filter={{ .toutput.route53.pub_zone_id }}"
+              - "--zone-id-filter={{ .toutput.route53.int_zone_id }}"
       - name: hello-world-exbiz
         source: hello-world
