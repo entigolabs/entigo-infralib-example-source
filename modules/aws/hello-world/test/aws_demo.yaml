@@ -1,0 +1,3 @@
+# Agent input of aws/hello-world for the aws_demo environment. The module has
+# no variables beyond prefix, which the agent sets; the file's presence is
+# what puts the module into the environment.

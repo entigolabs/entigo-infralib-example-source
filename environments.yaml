@@ -1,0 +1,37 @@
+# The environments this repository is tested on. See
+# https://github.com/entigolabs/entigo-infralib-test#environmentsyaml
+#
+# This repository holds two hello-world modules. Everything else that makes a
+# platform (network, cluster, ArgoCD, gateway, DNS) is an external module from
+# the released entigo-infralib, with its inputs under environments/<env>/.
+sources:
+  - url: https://github.com/entigolabs/entigo-infralib-release
+environments:
+  aws_demo:
+    cloud: aws
+    prefix: demo
+    region: eu-north-1
+    kube_context: arn:aws:eks:eu-north-1:877483565445:cluster/demo-infra-eks
+    gateways:
+      # The public gateway of the aws-alb module; hostnames are <namespace>.<domain>,
+      # domain being the route53 module's pub_domain.
+      external: {name: external, namespace: aws-alb-demo, domain: demo-net-route53.infralib.entigo.io}
+    steps:
+      - name: net
+        modules:
+          - aws/vpc
+          - aws-v2/route53
+          - aws/hello-world
+      - name: infra
+        vpc: {attach: true}
+        modules:
+          - aws/eks
+      - name: apps
+        type: argocd-apps
+        argocd_namespace: argocd-demo
+        default_modules: [aws-alb]
+        modules:
+          - argocd
+          - aws-alb
+          - external-dns
+        modules_dir: modules/k8s

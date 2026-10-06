@@ -1,0 +1,5 @@
+# Written by ./test.sh
+/agents/
+/logs/
+/.infralib-test/
+*.test

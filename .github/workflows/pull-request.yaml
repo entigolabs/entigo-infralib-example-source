@@ -1,0 +1,19 @@
+name: Pull request
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ['modules/**']
+  workflow_dispatch:
+    inputs:
+      modules:
+        description: 'JSON list of module directories, e.g. ["modules/k8s/hello-world"]'
+        required: true
+        type: string
+
+jobs:
+  test:
+    uses: entigolabs/entigo-infralib-test/.github/workflows/module-pull-request.yaml@main
+    with:
+      modules: ${{ inputs.modules || '' }}
+    secrets: inherit

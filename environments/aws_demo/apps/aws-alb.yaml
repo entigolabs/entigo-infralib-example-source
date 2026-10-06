@@ -1,0 +1,10 @@
+global:
+  routingResources: "httproute"
+  createIngress: false
+  createRoute: true
+  createType: route
+gateways:
+  internal:
+    enabled: false
+  service:
+    enabled: false
