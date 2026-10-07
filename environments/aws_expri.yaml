@@ -54,10 +54,13 @@ steps:
         source: aws/eks
         inputs:
           eks_cluster_public: true
-          # Cluster access for the CI identity, the github IAM user as in
-          # entigo-infralib. The identity that created the cluster has access
-          # by default.
-          aws_auth_user: "github"
+          # Cluster access is explicit: the pipeline's IAM user and the SSO
+          # administrators. The module's creator-admin default follows whoever
+          # runs the apply, which churns the entry between a workstation and
+          # CI and locks the other one out, so it is off.
+          enable_cluster_creator_admin_permissions: false
+          aws_auth_user: "example-repo"
+          iam_admin_role: "AWSReservedSSO_AdministratorAccess_.*"
           eks_main_min_size: 1
           eks_main_max_size: 3
           eks_main_capacity_type: "SPOT"
