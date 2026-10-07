@@ -13,7 +13,8 @@
 # external-dns watches Istio gateways so it needs istio-base's CRDs and the
 # istio-system namespace that istio-istiod creates, and ecr-proxy caches the
 # public registries because the VPC's S3 endpoint policy blocks the buckets
-# registry.k8s.io redirects to.
+# registry.k8s.io redirects to. metrics-server feeds the autoscalers of
+# istiod and argocd, without which ArgoCD rates them Degraded.
 #
 # Region comes from AWS_REGION, as for the agent. The environment lives in
 # the entigo-infralib AWS test account next to its own biz and pri, so the
@@ -84,6 +85,8 @@ steps:
             configs:
               params:
                 server.dex.server: ""
+      - name: metrics-server-expri
+        source: metrics-server
       - name: crossplane-system
         source: crossplane-core
       - name: crossplane-aws
