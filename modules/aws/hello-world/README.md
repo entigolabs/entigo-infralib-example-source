@@ -15,3 +15,5 @@ It has no input variables
         source: aws/hello-world
 
 ```
+
+The `greeting` variable (default `Hello`) sets the word the output greets with; the example's `aws_expri` environment uses `Tere`.
