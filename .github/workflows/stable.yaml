@@ -9,5 +9,7 @@ jobs:
   stable:
     uses: entigolabs/entigo-infralib-test/.github/workflows/module-stable.yaml@main
     with:
+      # Provision from the OCI release; the git release repository is the fallback.
+      source: oci://ghcr.io/entigolabs/entigo-infralib-example-release
       release_repo: https://github.com/entigolabs/entigo-infralib-example-release
     secrets: inherit
