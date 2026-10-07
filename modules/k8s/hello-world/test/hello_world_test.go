@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	kubernetesErrors "k8s.io/apimachinery/pkg/api/errors"
 
+	_ "github.com/entigolabs/entigo-infralib-test/aws" // k8s.Gateway reads the route53 outputs through the aws package
 	"github.com/entigolabs/entigo-infralib-test/env"
 	"github.com/entigolabs/entigo-infralib-test/k8s"
 )
