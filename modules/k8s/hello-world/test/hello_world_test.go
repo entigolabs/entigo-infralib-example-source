@@ -20,12 +20,15 @@ func TestHelloWorld(t *testing.T) {
 	})
 }
 
+// The deployment wait allows for a Spot node being replaced underneath the
+// pods, which takes several minutes including the image pull.
+
 // aws_exbiz: deployed and reachable through the external gateway (derived
 // from the aws-alb and route53 modules of the environment), with the gateway
 // address pinned so the check does not wait for public DNS.
 func testHelloWorldPublic(t *testing.T, e *env.Environment) {
 	c := k8s.Connect(t, e)
-	k8s.WaitUntilDeploymentAvailable(t, c, c.Namespace, 20, 6*time.Second)
+	k8s.WaitUntilDeploymentAvailable(t, c, c.Namespace, 60, 6*time.Second)
 
 	_, err := k8s.WaitUntilK8SHTTPRouteAvailable(t, c, c.Namespace, 20, 6*time.Second)
 	require.NoError(t, err, "HTTPRoute %s not accepted", c.Namespace)
@@ -38,7 +41,7 @@ func testHelloWorldPublic(t *testing.T, e *env.Environment) {
 // aws_expri: deployed, and deliberately not exposed.
 func testHelloWorldInternal(t *testing.T, e *env.Environment) {
 	c := k8s.Connect(t, e)
-	k8s.WaitUntilDeploymentAvailable(t, c, c.Namespace, 20, 6*time.Second)
+	k8s.WaitUntilDeploymentAvailable(t, c, c.Namespace, 60, 6*time.Second)
 
 	_, err := c.GetObjectE(k8s.HTTPRoutes, c.Namespace, c.Namespace)
 	require.True(t, kubernetesErrors.IsNotFound(err), "pri must not expose hello-world, got HTTPRoute lookup result: %v", err)
