@@ -12,4 +12,5 @@ jobs:
     uses: entigolabs/entigo-infralib-test/.github/workflows/module-release.yaml@main
     with:
       release_repo: https://github.com/entigolabs/entigo-infralib-example-release
+      oci_registries: ghcr.io/entigolabs/entigo-infralib-example-release,public.ecr.aws/entigolabs/entigo-infralib-example-release
     secrets: inherit
