@@ -10,7 +10,10 @@
 # kept to what the example needs: the vpc calculates its subnets from the
 # cidr, argocd and hello-world derive their hostnames from the route53 zone,
 # aws-alb and external-dns need crossplane and crossplane-aws to function,
-# and external-dns watches Istio gateways, so it needs istio-base's CRDs.
+# external-dns watches Istio gateways so it needs istio-base's CRDs and the
+# istio-system namespace that istio-istiod creates, and ecr-proxy caches the
+# public registries because the VPC's S3 endpoint policy blocks the buckets
+# registry.k8s.io redirects to.
 #
 # Region comes from AWS_REGION, as for the agent. The environment lives in
 # the entigo-infralib AWS test account next to its own biz and pri, so the
@@ -37,6 +40,8 @@ steps:
                 default_public  = true
               }
             }
+      - name: ecr-proxy
+        source: aws/ecr-proxy
       - name: hello-world
         source: aws/hello-world
   - name: infra
@@ -101,6 +106,8 @@ steps:
             internalGateway: external
       - name: istio-base-expri
         source: istio-base
+      - name: istio-system
+        source: istio-istiod
       - name: external-dns-expri
         source: external-dns
         inputs:
