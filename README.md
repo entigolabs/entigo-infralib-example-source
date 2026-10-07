@@ -45,7 +45,7 @@ The kubeconfig is yours to provide, for example `aws eks update-kubeconfig --reg
 ## Pipelines
 
 - **Pull request**: every module a pull request changes is applied in a step of its own on both environments and tested. The step stays until the environment is nuked. Needs the `AWS_*` secrets.
-- **Stable** (weekday mornings, or by hand): provisions both environments from the OCI release at `oci://ghcr.io/entigolabs/entigo-infralib-example-release` and runs that release's tests.
+- **Stable** (weekday mornings, or by hand): provisions both environments from the OCI release at `oci://public.ecr.aws/entigolabs/entigo-infralib-example-release` and runs that release's tests.
 - **Release** (after a green Stable, or by hand): applies `main` to both environments, tests, and when main is ahead of the latest release tags it, creates the GitHub release, publishes the charts, modules and a signed index as OCI packages to ghcr.io mirrored to ECR Public, and publishes `modules/` to [entigo-infralib-example-release](https://github.com/entigolabs/entigo-infralib-example-release). Needs `SSH_PRIVATE_KEY`, a deploy key with write access there.
 
 ## Status
