@@ -13,7 +13,7 @@ Two modules do not make a platform. Each file under `environments/` is therefore
 
 An environment file is named `<cloud>_<prefix>.yaml`. The environments live in the entigo-infralib AWS test account next to its own biz and pri, so they are `aws_exbiz` and `aws_expri`. The region comes from `AWS_REGION`, as for the agent.
 
-Releases of this repository go to [entigo-infralib-example-release](https://github.com/entigolabs/entigo-infralib-example-release), the way entigo-infralib releases go to entigo-infralib-release.
+Releases of this repository are its git tags and GitHub releases; they are also published to [entigo-infralib-example-release](https://github.com/entigolabs/entigo-infralib-example-release), the way entigo-infralib releases go to entigo-infralib-release, to exercise that optional path. OCI publishing follows.
 
 ## Layout
 
