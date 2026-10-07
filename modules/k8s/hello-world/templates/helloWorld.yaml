@@ -74,11 +74,17 @@ spec:
   policyTypes:
     - Ingress
   ingress:
-    - from:
+    # Policies address the pod's port, not the Service's. When the chart is
+    # published through a route or an ingress the load balancer's addresses
+    # are not pods, so any source is allowed; otherwise only the chart's own
+    # pods may connect.
+    - ports:
+        - protocol: TCP
+          port: 8080
+      {{- if not (or .Values.httpRoute.enabled .Values.ingress.enabled) }}
+      from:
         - podSelector:
             matchLabels:
               app: {{ .Release.Name }}
-      ports:
-        - protocol: TCP
-          port: 80
+      {{- end }}
 
