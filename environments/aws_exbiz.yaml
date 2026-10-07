@@ -9,7 +9,8 @@
 # platform comes from the released entigo-infralib with its inputs inline,
 # kept to what the example needs: the vpc calculates its subnets from the
 # cidr, argocd and hello-world derive their hostnames from the route53 zone,
-# aws-alb and external-dns need crossplane and crossplane-aws to function.
+# aws-alb and external-dns need crossplane and crossplane-aws to function,
+# and external-dns watches Istio gateways, so it needs istio-base's CRDs.
 #
 # Region comes from AWS_REGION, as for the agent. The environment lives in
 # the entigo-infralib AWS test account next to its own biz and pri, so the
@@ -98,6 +99,8 @@ steps:
             createRoute: true
             createType: route
             internalGateway: external
+      - name: istio-base-exbiz
+        source: istio-base
       - name: external-dns-exbiz
         source: external-dns
         inputs:
