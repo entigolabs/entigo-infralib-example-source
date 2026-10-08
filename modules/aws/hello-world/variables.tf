@@ -5,5 +5,5 @@ variable "prefix" {
 variable "greeting" {
   type        = string
   default     = "Hello"
-  description = "The word the output greets with."
+  description = "The word the output greets with, for example Hello."
 }
