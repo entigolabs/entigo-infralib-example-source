@@ -7,7 +7,7 @@
 # This repository holds two hello-world modules; their inputs live in
 # modules/*/hello-world/test/aws_exbiz.yaml. Everything else that makes a
 # platform comes from the released entigo-infralib with its inputs inline,
-# kept to what the example needs: the vpc calculates its subnets from the
+# kept to what the example needs and never restating a module's defaults: the vpc calculates its subnets from the
 # cidr, argocd and hello-world derive their hostnames from the route53 zone,
 # aws-alb and external-dns need crossplane and crossplane-aws to function,
 # external-dns watches Istio gateways so it needs istio-base's CRDs and the
@@ -61,12 +61,9 @@ steps:
           enable_cluster_creator_admin_permissions: false
           aws_auth_user: "example-repo"
           iam_admin_role: "AWSReservedSSO_AdministratorAccess_.*"
-          eks_main_min_size: 1
-          eks_main_max_size: 3
           eks_main_capacity_type: "SPOT"
           eks_main_subnets: |
             ["{{ .toutput.vpc.private_subnets[0] }}"]
-          eks_tools_min_size: 1
           eks_tools_max_size: 2
           eks_tools_capacity_type: "SPOT"
           eks_mon_capacity_type: "SPOT"
@@ -109,7 +106,7 @@ steps:
             service:
               enabled: false
           global:
-            routingResources: "both"
+            routingResources: "httproute"
             createIngress: false
             createRoute: true
             createType: route
@@ -122,6 +119,8 @@ steps:
         source: external-dns
         inputs:
           external-dns:
+            # A list overrides the chart's list wholesale, so the default
+            # metrics flag must be repeated next to the added zone filter.
             extraArgs:
               - "--metrics-address=:7979"
               - "--zone-id-filter={{ .toutput.route53.pub_zone_id }}"

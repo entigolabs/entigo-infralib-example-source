@@ -1,3 +1,2 @@
-# Internal: no route, reachable inside the cluster only.
-httpRoute:
-  enabled: false
+# Internal: the chart's defaults, no route. Scenarios never restate defaults,
+# so a changed default would be caught here.
