@@ -10,3 +10,5 @@ No additional values need to be specified.
         source: hello-world
 
 ```
+
+Used by the example pipelines as the chart under test.
