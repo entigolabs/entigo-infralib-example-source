@@ -1,0 +1,12 @@
+name: Main
+
+on:
+  push:
+    branches: [main]
+    paths: ['modules/**', 'environments/**']
+  workflow_dispatch:
+
+jobs:
+  main:
+    uses: entigolabs/entigo-infralib-test/.github/workflows/module-main.yaml@main
+    secrets: inherit
