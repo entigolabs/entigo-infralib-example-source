@@ -126,3 +126,5 @@ steps:
               - "--zone-id-filter={{ .toutput.route53.pub_zone_id }}"
       - name: hello-world-expri
         source: hello-world
+      - name: hello-world-pinned-expri
+        source: hello-world-pinned
