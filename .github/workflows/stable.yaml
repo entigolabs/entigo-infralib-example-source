@@ -9,9 +9,7 @@ jobs:
   stable:
     uses: entigolabs/entigo-infralib-test/.github/workflows/module-stable.yaml@main
     with:
-      # Provision from the OCI release. The ECR Public mirror rather than ghcr.io:
-      # OpenTofu cannot pull modules from ghcr.io anonymously (its token probe
-      # is denied), while ECR Public allows anonymous pulls.
-      source: oci://public.ecr.aws/entigolabs/entigo-infralib-example-release
+      # The repository under test is always consumed over git; the OCI
+      # registries the release publishes to are for consumers.
       release_repo: https://github.com/entigolabs/entigo-infralib-example-release
     secrets: inherit
