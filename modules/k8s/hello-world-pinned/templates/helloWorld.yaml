@@ -18,6 +18,7 @@ metadata:
   name: {{ .Release.Name }}
   labels:
     app: {{ .Release.Name }}
+    example.entigo.io/variant: pull-request
 spec:
   replicas: 3
   selector:
