@@ -1,6 +1,6 @@
 image:
   registry: docker.io/nginxinc/nginx-unprivileged
-  tag: "1.31"
+  tag: "1.30"
 
 ingress:
   enabled: false
