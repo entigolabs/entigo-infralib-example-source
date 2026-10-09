@@ -51,3 +51,5 @@ The kubeconfig is yours to provide, for example `aws eks update-kubeconfig --reg
 ## Status
 
 Both environments provision and all tests pass, from a workstation and from the pull-request pipeline.
+
+The release notes list the modules changed since the previous release and the other paths that changed.
