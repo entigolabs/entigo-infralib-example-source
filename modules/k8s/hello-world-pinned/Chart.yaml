@@ -1,6 +1,6 @@
 apiVersion: v2
 name: hello-world-pinned
-description: A copy of hello-world that is pinned to its regular name in pull requests
+description: A copy of hello-world that is pinned to its regular name in pull requests, on AWS and Google
 version: 0.1.0
 appVersion: "0.1.0"
 

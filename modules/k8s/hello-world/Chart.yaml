@@ -1,6 +1,6 @@
 apiVersion: v2
 name: hello-world
-description: A hello-world Deployment with an optional HTTPRoute
+description: A hello-world Deployment with an optional HTTPRoute, on AWS and Google
 version: 0.1.0
 appVersion: "0.1.0"
 
