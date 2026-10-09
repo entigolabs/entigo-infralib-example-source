@@ -1,0 +1,106 @@
+# Agent configuration of the google_exbiz environment: cloud google, prefix
+# exbiz, both from the file name. Same shape as aws_exbiz.yaml, with the
+# Google modules of entigo-infralib: the vpc with its secondary ranges for
+# pods and services, the dns zones under gcp.infralib.entigo.io, gar-proxy as
+# the pull-through cache, a public-endpoint GKE cluster, and on it argocd,
+# crossplane with its Google provider (google-gateway and external-dns act
+# through it), the gateway, istio for external-dns and the two hello-worlds.
+# GKE ships its own metrics-server, so none is installed.
+#
+# Project, region and zone come from GOOGLE_PROJECT, GOOGLE_REGION and
+# GOOGLE_ZONE, as for the agent. The environment lives in the entigo-infralib
+# Google project next to its own biz and pri, so the prefix and the cidr are
+# its own, and the gar-proxy reads the registry credentials biz keeps in
+# Secret Manager.
+sources:
+  - url: https://github.com/entigolabs/entigo-infralib-release
+steps:
+  - name: net
+    type: terraform
+    modules:
+      - name: vpc
+        source: google/vpc
+        inputs:
+          vpc_cidr: "10.170.0.0/16"
+      - name: dns
+        source: google/dns
+        inputs:
+          parent_zone_id: "gcp-infralib-entigo-io"
+      - name: gar-proxy
+        source: google/gar-proxy
+        inputs:
+          hub_username_secret: "gar-proxy-hub-username"
+          hub_access_token_secret: "gar-proxy-hub-access-token"
+      - name: hello-world
+        source: google/hello-world
+  - name: infra
+    type: terraform
+    vpc:
+      attach: true
+    modules:
+      - name: gke
+        source: google/gke
+        inputs:
+          # Reachable from the pipeline and from workstations, like the EKS
+          # cluster of aws_exbiz; the module defaults to a private endpoint.
+          enable_private_endpoint: false
+          deploy_using_private_endpoint: false
+          master_authorized_networks: |
+            [{ display_name = "Allow all", cidr_block = "0.0.0.0/0" }]
+          gke_main_min_size: 1
+          gke_main_max_size: 2
+          gke_main_spot_nodes: true
+          gke_tools_min_size: 1
+          gke_tools_max_size: 2
+          gke_tools_spot_nodes: true
+          gke_mon_max_size: 1
+          gke_mon_spot_nodes: true
+      - name: crossplane
+        source: google/crossplane
+  - name: apps
+    type: argocd-apps
+    argocd_namespace: argocd-exbiz
+    modules:
+      - name: argocd-exbiz
+        source: argocd
+        inputs:
+          argocd:
+            dex:
+              enabled: false
+            repoServer:
+              autoscaling:
+                maxReplicas: 1
+            configs:
+              params:
+                server.dex.server: ""
+      - name: crossplane-system
+        source: crossplane-core
+      - name: crossplane-google
+        source: crossplane-google
+      - name: google-gateway
+        source: google-gateway
+        inputs:
+          # One load balancer: the internal gateway name points at the
+          # external gateway and the internal one is not created.
+          global:
+            internalGateway: "{{ .module.name }}-external"
+          gateways:
+            internal:
+              enabled: false
+      - name: istio-base-exbiz
+        source: istio-base
+      - name: istio-system
+        source: istio-istiod
+      - name: external-dns-exbiz
+        source: external-dns
+        inputs:
+          external-dns:
+            # A list overrides the chart's list wholesale, so the default
+            # metrics flag must be repeated next to the added zone filter.
+            extraArgs:
+              - "--metrics-address=:7979"
+              - "--zone-id-filter={{ .toutput.dns.pub_zone_id }}"
+      - name: hello-world-exbiz
+        source: hello-world
+      - name: hello-world-pinned-exbiz
+        source: hello-world-pinned

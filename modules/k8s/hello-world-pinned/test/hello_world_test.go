@@ -20,15 +20,16 @@ func TestDeployment(t *testing.T) {
 	})
 }
 
-// Exposure differs per environment: public on exbiz, internal only on expri.
+// Exposure differs per environment: public on the exbiz environments, none on expri.
 func TestRoute(t *testing.T) {
 	env.RunEach(t, map[string]env.TestFunc{
 		"aws_exbiz": testRoutePublic,
 		"aws_expri": testRouteAbsent,
+		"google_exbiz": testRoutePublic,
 	})
 }
 
-// aws_exbiz: the HTTPRoute is accepted and answers 200 through the gateway.
+// exbiz: the HTTPRoute is accepted and answers 200 through the gateway.
 // Hostname, scheme and the gateway address come from the objects; the probe
 // runs inside the cluster pinned to the address, so DNS need not have caught up.
 func testRoutePublic(t *testing.T, e *env.Environment) {
