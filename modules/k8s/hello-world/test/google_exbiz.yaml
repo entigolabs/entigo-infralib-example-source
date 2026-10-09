@@ -1,0 +1,4 @@
+# Public: served through the platform's external gateway (google-gateway). The
+# hostname and gateway come from agent_input.yaml's templating.
+httpRoute:
+  enabled: true
