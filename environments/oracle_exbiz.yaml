@@ -1,0 +1,113 @@
+# Agent configuration of the oracle_exbiz environment: cloud oracle, prefix
+# exbiz, both from the file name. Same shape as the aws and google ones, with
+# the Oracle modules of entigo-infralib: the vcn, a certificate authority
+# adopted from biz (the nuke keeps it, since OCI deletes authorities and
+# vaults only after a waiting period), the dns zones with a wildcard
+# certificate, a public-endpoint OKE cluster with its default tools pool,
+# and on it argocd, metrics-server, istio with the OCI native ingress
+# controller in front of it, the oracle-gateway and the two hello-worlds.
+# The realm has no public DNS, so the gateway is internal, like
+# entigo-infralib's own Oracle environments, and nothing publishes records:
+# the route tests reach the gateway by address.
+#
+# Region and compartment come from OCI_REGION and OCI_COMPARTMENT_ID, as for
+# the agent. The environment lives in the entigo-infralib Oracle compartment
+# next to its own biz and pri, so the prefix and the cidr are its own.
+sources:
+  - url: https://github.com/entigolabs/entigo-infralib-release
+steps:
+  - name: net
+    type: terraform
+    modules:
+      - name: vpc
+        source: oracle/vpc
+        inputs:
+          vpc_cidr: "10.203.0.0/16"
+      - name: pca
+        source: oracle/pca
+        inputs:
+          create_ca: false
+          ca_name: "biz-net-pca-root-ca"
+      - name: dns
+        source: oracle/dns
+        inputs:
+          # One private zone: the EU Sovereign Cloud realm has no public (GLOBAL)
+          # zones, so entigo-infralib's Oracle environments have none either and
+          # the dns module lets the pub_* outputs fall back to the private zone.
+          # The name need not resolve from outside, the route tests reach the
+          # gateway by address; what the gateway needs is the wildcard
+          # certificate the zone gets.
+          domains: |
+            {
+              "private" = {
+                domain_name     = "{{ .config.prefix }}-{{ .step.name }}-{{ .module.name }}-int.oci.infralib.entigo.io"
+                private         = true
+                default_private = true
+              }
+            }
+          # A deleted OCI certificate keeps its name until its scheduled
+          # deletion is through, and the environment is rebuilt after every
+          # nightly nuke, so the certificate names carry a random suffix.
+          name_salt: true
+      - name: hello-world
+        source: oracle/hello-world
+  - name: infra
+    type: terraform
+    vpc:
+      attach: true
+    modules:
+      - name: oke
+        source: oracle/oke
+        inputs:
+          # Reachable from the pipeline and from workstations, like the other
+          # clusters of the example; the module defaults to a private endpoint
+          # and the runners have no fixed addresses.
+          is_public_ip_enabled: true
+          oke_api_access_cidrs: |
+            ["0.0.0.0/0"]
+  - name: apps
+    type: argocd-apps
+    argocd_namespace: argocd-exbiz
+    modules:
+      - name: argocd-exbiz
+        source: argocd
+        inputs:
+          argocd:
+            dex:
+              enabled: false
+            repoServer:
+              autoscaling:
+                maxReplicas: 1
+            configs:
+              params:
+                server.dex.server: ""
+      - name: metrics-server-exbiz
+        source: metrics-server
+      - name: istio-base-exbiz
+        source: istio-base
+      - name: istio-system
+        source: istio-istiod
+      - name: oci-native-ingress-controller-exbiz
+        source: oci-native-ingress-controller
+        inputs:
+          # Without a public zone nothing uses the external class, and each
+          # class costs a load balancer out of the region's limit.
+          ingressClasses:
+            external:
+              enabled: false
+      - name: oracle-gateway-exbiz
+        source: oracle-gateway
+        inputs:
+          # Without a public zone the external gateway would get the internal
+          # zone's domain and certificate and collide with the internal one,
+          # so only the internal gateway exists and the modules that ask for
+          # the external one are pointed at it, as entigo-infralib does.
+          global:
+            externalGateway: internal
+          gateways:
+            external:
+              enabled: false
+      - name: hello-world-exbiz
+        source: hello-world
+      - name: hello-world-pinned-exbiz
+        source: hello-world-pinned
