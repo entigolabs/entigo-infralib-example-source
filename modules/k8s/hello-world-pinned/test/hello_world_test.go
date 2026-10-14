@@ -20,12 +20,13 @@ func TestDeployment(t *testing.T) {
 	})
 }
 
-// Exposure differs per environment: public on the exbiz environments, none on expri.
+// Exposure differs per environment: public on aws_exbiz and google_exbiz, internal on oracle_exbiz, none on expri.
 func TestRoute(t *testing.T) {
 	env.RunEach(t, map[string]env.TestFunc{
 		"aws_exbiz": testRoutePublic,
 		"aws_expri": testRouteAbsent,
 		"google_exbiz": testRoutePublic,
+		"oracle_exbiz": testRouteInternal,
 	})
 }
 
@@ -36,6 +37,15 @@ func testRoutePublic(t *testing.T, e *env.Environment) {
 	c := k8s.Connect(t, e)
 	route := k8s.WaitUntilRouteReachable(t, c, c.Namespace, 100, 6*time.Second)
 	require.False(t, route.Internal(), "%s is served by an internal load balancer", route.URL())
+}
+
+// oracle_exbiz: exposed, but the realm has no public DNS and so no public
+// gateway; the route answers through the internal load balancer of the OCI
+// native ingress controller in front of the Istio gateway.
+func testRouteInternal(t *testing.T, e *env.Environment) {
+	c := k8s.Connect(t, e)
+	route := k8s.WaitUntilRouteReachable(t, c, c.Namespace, 100, 6*time.Second)
+	require.True(t, route.Internal(), "%s is served by a public load balancer", route.URL())
 }
 
 // aws_expri: deliberately not exposed, no HTTPRoute at all.

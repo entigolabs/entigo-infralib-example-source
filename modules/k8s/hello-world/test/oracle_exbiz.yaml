@@ -1,0 +1,4 @@
+# Exposed through the platform's gateway (oracle-gateway, internal: the realm has no
+# public DNS). The hostname and gateway come from agent_input.yaml's templating.
+httpRoute:
+  enabled: true
