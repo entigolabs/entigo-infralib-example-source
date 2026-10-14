@@ -4,8 +4,10 @@
 # adopted from biz (the nuke keeps it, since OCI deletes authorities and
 # vaults only after a waiting period), the dns zones with a wildcard
 # certificate, a public-endpoint OKE cluster with its default tools pool,
-# and on it argocd, metrics-server, istio with the OCI native ingress
-# controller in front of it, the oracle-gateway and the two hello-worlds.
+# and on it argocd, metrics-server, crossplane with its Oracle provider (the
+# ingress controller creates its IAM policy and load balancer resources
+# through it), istio with the OCI native ingress controller in front of it,
+# the oracle-gateway and the two hello-worlds.
 # The realm has no public DNS, so the gateway is internal, like
 # entigo-infralib's own Oracle environments, and nothing publishes records:
 # the route tests reach the gateway by address.
@@ -83,6 +85,10 @@ steps:
                 server.dex.server: ""
       - name: metrics-server-exbiz
         source: metrics-server
+      - name: crossplane-system
+        source: crossplane-core
+      - name: crossplane-oracle
+        source: crossplane-oracle
       - name: istio-base-exbiz
         source: istio-base
       - name: istio-system
