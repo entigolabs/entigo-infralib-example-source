@@ -48,7 +48,7 @@ modules/k8s/hello-world/test.sh    the same, from the module's directory
 ./test.sh --help
 ```
 
-The kubeconfig is yours to provide, for example `aws eks update-kubeconfig --region eu-north-1 --name exbiz-infra-eks` or `gcloud container clusters get-credentials exbiz-infra-gke --region europe-north1`; the test picks the context that command creates for the environment's cluster module. OKE names its context after the cluster id, so rename it: `oci ce cluster create-kubeconfig --cluster-id <id> --token-version 2.0.0 --kube-endpoint PUBLIC_ENDPOINT && kubectl config rename-context context-c<last 11 of the id> exbiz-infra-oke`, as the framework's kubeconfig action does.
+The kubeconfig is yours to provide, for example `aws eks update-kubeconfig --region eu-north-1 --name exbiz-infra-eks` or `gcloud container clusters get-credentials exbiz-infra-gke --region europe-north1`; the test picks the context that command creates for the environment's cluster module. For OKE it is `oci ce cluster create-kubeconfig --cluster-id <id of exbiz-infra-oke> --token-version 2.0.0 --kube-endpoint PUBLIC_ENDPOINT`; the test matches the `context-exbiz-infra-oke-...` context that creates.
 
 ## Pipelines
 
