@@ -30,7 +30,7 @@ modules/k8s/hello-world-pinned/ the same, plus test/module.yaml with pin_step
 go.mod                         requires github.com/entigolabs/entigo-infralib-test
 test.sh                        bootstrap of the orchestrator, pins the framework version
 release_version.txt            major.minor of the next release
-.github/workflows/             pull-request, stable and release, each calling a reusable workflow of the framework
+.github/workflows/             pull-request, main, stable, release and report, each calling a reusable workflow of the framework
 ```
 
 ## Running
@@ -52,6 +52,7 @@ The kubeconfig is yours to provide, for example `aws eks update-kubeconfig --reg
 - **Pull request**: every module a pull request changes is applied in a step of its own on every environment of its cloud and tested. The step stays until the environment is nuked. Needs the `AWS_*` and `GOOGLE_*` secrets.
 - **Stable** (weekday mornings, or by hand): provisions every environment from the latest release in [entigo-infralib-example-release](https://github.com/entigolabs/entigo-infralib-example-release) and runs that release's tests.
 - **Release** (after a green Stable, or by hand): applies `main` to every environment, tests, and when main is ahead of the latest release tags it, creates the GitHub release, publishes the charts, modules and a signed index as OCI packages to ghcr.io mirrored to ECR Public, and publishes `modules/` to [entigo-infralib-example-release](https://github.com/entigolabs/entigo-infralib-example-release). Needs `SSH_PRIVATE_KEY`, a deploy key with write access there.
+- **Report** (Monday mornings, or by hand): lists the updates available to the modules' Helm chart dependencies, Crossplane providers, OpenTofu providers and registry modules, one job per kind, in the job summary and, with the `SLACK_*` secrets, one Slack message per kind.
 
 ## Status
 
