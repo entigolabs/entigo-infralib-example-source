@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       cloud:
-        description: cloud to run; anything but all is a partial run that triggers no release
+        description: cloud to run; a dispatched run never triggers a release
         type: choice
         options: [all, aws, google, oracle, azure]
         default: all
