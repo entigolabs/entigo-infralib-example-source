@@ -5,12 +5,19 @@ on:
     workflows: [Stable]
     types: [completed]
   workflow_dispatch:
+    inputs:
+      cloud:
+        description: cloud to run; anything but all applies and tests main there without releasing
+        type: choice
+        options: [all, aws, google, oracle, azure]
+        default: all
 
 jobs:
   release:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     uses: entigolabs/entigo-infralib-test/.github/workflows/module-release.yaml@main
     with:
+      clouds: ${{ inputs.cloud || '' }}
       release_repo: https://github.com/entigolabs/entigo-infralib-example-release
       oci_registries: ghcr.io/entigolabs/entigo-infralib-example-release,public.ecr.aws/entigolabs/entigo-infralib-example-release
     secrets: inherit
