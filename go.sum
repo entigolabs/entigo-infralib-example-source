@@ -82,6 +82,8 @@ github.com/entigolabs/entigo-infralib-test v0.6.11 h1:ONnz96rLZZQa884ziLoOaAOUR8
 github.com/entigolabs/entigo-infralib-test v0.6.11/go.mod h1:1OuThG5Vwrh8bjIvHoHjIMhRosYbIPTxjItfHfYX1iM=
 github.com/entigolabs/entigo-infralib-test v0.6.12 h1:ToNaMd16WKBcHDYFiqgLnYKa2Z+SDlu/NJ4nWVJ7YPA=
 github.com/entigolabs/entigo-infralib-test v0.6.12/go.mod h1:1OuThG5Vwrh8bjIvHoHjIMhRosYbIPTxjItfHfYX1iM=
+github.com/entigolabs/entigo-infralib-test v0.6.13 h1:UkvKFbZ8UvCKO/2bW1ylgkJhAgj5K1G+Nw8mE5wtJyI=
+github.com/entigolabs/entigo-infralib-test v0.6.13/go.mod h1:TjtpFQhXy5t0BxL2rsR69X7WkZQ6NBddfkJhHKcVLiM=
 github.com/envoyproxy/go-control-plane v0.14.0 h1:hbG2kr4RuFj222B6+7T83thSPqLjwBIfQawTkC++2HA=
 github.com/envoyproxy/go-control-plane v0.14.0/go.mod h1:NcS5X47pLl/hfqxU70yPwL9ZMkUlwlKxtAohpi2wBEU=
 github.com/envoyproxy/go-control-plane/envoy v1.37.0 h1:u3riX6BoYRfF4Dr7dwSOroNfdSbEPe9Yyl09/B6wBrQ=
