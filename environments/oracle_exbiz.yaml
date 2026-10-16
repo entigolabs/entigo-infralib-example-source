@@ -29,7 +29,7 @@ steps:
         source: oracle/pca
         inputs:
           create_ca: false
-          ca_name: "biz-net-pca-root-ca"
+          ca_name: "biz-net-pca-ca"
       - name: dns
         source: oracle/dns
         inputs:
