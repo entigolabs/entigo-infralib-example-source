@@ -3,7 +3,7 @@ module github.com/entigolabs/entigo-infralib-example-source
 go 1.26.0
 
 require (
-	github.com/entigolabs/entigo-infralib-test v0.9.22-0.20261121090314-4153d60c41bd
+	github.com/entigolabs/entigo-infralib-test v0.9.22-0.20261121094939-e343b81b8514
 	github.com/stretchr/testify v1.12.1
 	k8s.io/apimachinery v0.37.2
 )
