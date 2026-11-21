@@ -62,6 +62,6 @@ The kubeconfig is yours to provide, for example `aws eks update-kubeconfig --reg
 
 ## Status
 
-The AWS, Google and Oracle environments provision and all their tests pass, from a workstation and from the pipelines. `azure_exbiz` has not run yet: the repository has no Azure credentials, and the pipelines leave a cloud without credentials out.
+The AWS, Google and Oracle environments provision and all their tests pass, from a workstation and from the pipelines. `azure_exbiz` is new and has not been provisioned yet.
 
 The release notes list the modules changed since the previous release and the other paths that changed.
