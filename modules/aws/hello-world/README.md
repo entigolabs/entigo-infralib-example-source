@@ -19,3 +19,5 @@ It has no input variables
 The `greeting` variable (default `Hello`) sets the word the output greets with; the example's `aws_expri` environment uses `Tere`.
 
 Used by the example pipelines as the terraform module under test.
+
+<!-- mock change: exercises the pull request workflow, not for merging -->

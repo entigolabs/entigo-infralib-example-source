@@ -14,3 +14,5 @@ No additional values need to be specified.
 Used by the example pipelines as the chart under test.
 
 The chart is deployed by ArgoCD through the agent; see argo-apps.yaml.
+
+<!-- mock change: exercises the pull request workflow, not for merging -->
