@@ -20,13 +20,14 @@ func TestDeployment(t *testing.T) {
 	})
 }
 
-// Exposure differs per environment: public on aws_exbiz and google_exbiz, internal on oracle_exbiz, none on expri.
+// Exposure differs per environment: public on aws_exbiz, google_exbiz and azure_exbiz, internal on oracle_exbiz, none on expri.
 func TestRoute(t *testing.T) {
 	env.RunEach(t, map[string]env.TestFunc{
-		"aws_exbiz": testRoutePublic,
-		"aws_expri": testRouteAbsent,
+		"aws_exbiz":    testRoutePublic,
+		"aws_expri":    testRouteAbsent,
 		"google_exbiz": testRoutePublic,
 		"oracle_exbiz": testRouteInternal,
+		"azure_exbiz":  testRoutePublic,
 	})
 }
 

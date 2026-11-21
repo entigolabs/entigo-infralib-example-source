@@ -1,6 +1,6 @@
 # Reports the updates available to the modules' dependencies every Monday
 # morning through the framework's reusable workflow: one job per kind (k8s,
-# aws, google, oracle), each posting a Slack message of its own when the
+# aws, google, oracle, azure), each posting a Slack message of its own when the
 # SLACK_* secrets exist, else only the job summary. Needs no credentials:
 # the checks ask public registries. A repository with checks of its own puts
 # them in report/<kind>.sh, which the framework runs after its own.
@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       kinds:
-        description: comma separated kinds (k8s, aws, google, oracle); empty for all
+        description: comma separated kinds (k8s, aws, google, oracle, azure); empty for all
         type: string
         default: ''
 

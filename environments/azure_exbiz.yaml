@@ -1,0 +1,121 @@
+# Agent configuration of the azure_exbiz environment: cloud azure, prefix
+# exbiz, both from the file name. Same shape as the other clouds, with the
+# Azure modules of entigo-infralib: the vpc, which calculates its subnets
+# from the cidr, one public dns zone under azure.infralib.entigo.io, a
+# public-endpoint AKS cluster, the identities of crossplane and a private
+# Application Gateway for Containers (agc), and on the cluster argocd,
+# crossplane with its Azure providers (external-dns and cert-manager get
+# their identities through it), cert-manager for the gateway certificates
+# (the Application Gateway for Containers reads certificates only from
+# Kubernetes Secrets), the azure-gateway, istio for external-dns and the two
+# hello-worlds. AKS ships its own metrics-server, so none is installed.
+# There is no registry cache: without Docker Hub credentials the acr-proxy
+# module caches nothing of Docker Hub, and the images are few.
+#
+# Location and subscription come from AZURE_LOCATION and
+# AZURE_SUBSCRIPTION_ID, as for the agent. The environment lives in the
+# entigo-infralib Azure subscription next to its own biz and pri, so the
+# prefix and the cidr are its own.
+sources:
+  - url: https://github.com/entigolabs/entigo-infralib-release
+steps:
+  - name: net
+    type: terraform
+    modules:
+      - name: vpc
+        source: azure/vpc
+        inputs:
+          vpc_cidr: "10.180.0.0/16"
+      - name: dns
+        source: azure/dns
+        inputs:
+          # One public zone, delegated from the permanent parent zone of the
+          # subscription; a single public domain is the internal one too.
+          domains: |
+            {
+              "exbiz" = {
+                domain_name    = "{{ .config.prefix }}-{{ .step.name }}-{{ .module.name }}.azure.infralib.entigo.io"
+                parent_zone_id = "/subscriptions/{{ .agent.accountId }}/resourceGroups/infralib-permanent-westeurope/providers/Microsoft.Network/dnszones/azure.infralib.entigo.io"
+              }
+            }
+      - name: hello-world
+        source: azure/hello-world
+  - name: infra
+    type: terraform
+    vpc:
+      attach: true
+    modules:
+      - name: aks
+        source: azure/aks
+        inputs:
+          # Reachable from the pipeline and from workstations, like the other
+          # clusters of the example; the module defaults to a private cluster
+          # and the runners have no fixed addresses.
+          private_cluster_enabled: false
+          api_server_authorized_ip_ranges: |
+            ["0.0.0.0/0"]
+          # Small pools, and no spot nodes: AKS taints those itself and the
+          # hello-worlds tolerate nothing.
+          aks_main_min_size: 1
+          aks_main_max_size: 2
+          aks_mon_min_size: 1
+          aks_mon_max_size: 1
+          aks_tools_min_size: 1
+          aks_tools_max_size: 2
+      - name: crossplane
+        source: azure/crossplane
+      # The gateway module wires its internal gateway to this private
+      # Application Gateway for Containers.
+      - name: agc
+        source: azure/agc
+  - name: apps
+    type: argocd-apps
+    argocd_namespace: argocd-exbiz
+    modules:
+      - name: argocd-exbiz
+        source: argocd
+        inputs:
+          argocd:
+            dex:
+              enabled: false
+            repoServer:
+              autoscaling:
+                maxReplicas: 1
+            configs:
+              params:
+                server.dex.server: ""
+      - name: crossplane-system
+        source: crossplane-core
+      - name: crossplane-azure
+        source: crossplane-azure
+      - name: cert-manager-exbiz
+        source: cert-manager
+        inputs:
+          # The environment is rebuilt after every nuke and would run into
+          # the weekly limits of the production directory.
+          acme:
+            server: https://acme-staging-v02.api.letsencrypt.org/directory
+      # The name is fixed: the aks module creates the identity of the ALB
+      # controller for the service account in the azure-gateway namespace.
+      - name: azure-gateway
+        source: azure-gateway
+        inputs:
+          # The modules that ask for the internal gateway (argocd) are
+          # pointed at the external one: with a single public zone the
+          # internal gateway serves the same domain.
+          global:
+            internalGateway: external
+      - name: istio-base-exbiz
+        source: istio-base
+      - name: istio-system
+        source: istio-istiod
+      - name: external-dns-exbiz
+        source: external-dns
+        inputs:
+          # No private zone to publish to.
+          external-dns-private:
+            enabled: false
+      - name: hello-world-exbiz
+        source: hello-world
+      - name: hello-world-pinned-exbiz
+        source: hello-world-pinned

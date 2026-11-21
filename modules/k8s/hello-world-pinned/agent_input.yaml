@@ -1,5 +1,5 @@
 image:
-  registry: '{{ .toptout.ecr-proxy.hub_registry | .toptout.gar-proxy.hub_registry | "docker.io" }}/nginx/nginx-unprivileged'
+  registry: '{{ .toptout.ecr-proxy.hub_registry | .toptout.gar-proxy.hub_registry | .toptout.acr-proxy.hub_registry | "docker.io" }}/nginx/nginx-unprivileged'
 
 # Shared by both exposure paths - templates/httpRoute.yaml reads ingress.host for its
 # hostnames, see the note in values.yaml. Neither path is enabled by default; each cloud's
@@ -10,6 +10,6 @@ ingress:
 # The external gateway, like harbor and istio-gateway: hello-world is the public smoke test.
 httpRoute:
   gateway:
-    name: '{{ .toptin.aws-alb.global.externalGateway | .toptin.google-gateway.global.externalGateway | .toptin.oracle-gateway.global.externalGateway | required }}'
-    namespace: '{{ .toptmodule.aws-alb | .toptmodule.google-gateway | .toptmodule.oracle-gateway | required }}'
+    name: '{{ .toptin.aws-alb.global.externalGateway | .toptin.google-gateway.global.externalGateway | .toptin.oracle-gateway.global.externalGateway | .toptin.azure-gateway.global.externalGateway | required }}'
+    namespace: '{{ .toptmodule.aws-alb | .toptmodule.google-gateway | .toptmodule.oracle-gateway | .toptmodule.azure-gateway | required }}'
     sectionName: https
