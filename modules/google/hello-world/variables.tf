@@ -1,5 +1,6 @@
 variable "prefix" {
-  type = string
+  type        = string
+  description = "Name prefix of the environment, set by the agent."
 }
 
 variable "greeting" {
