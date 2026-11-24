@@ -17,7 +17,7 @@ A hello-world module and a chart do not make a platform. Each file under `enviro
 
 An environment file is named `<cloud>_<prefix>.yaml`. The environments live in the entigo-infralib test accounts next to its own biz and pri, so they are `aws_exbiz`, `aws_expri`, `google_exbiz`, `oracle_exbiz` and `azure_exbiz`. Region, project, zone, compartment, location and subscription come from `AWS_REGION`, `GOOGLE_PROJECT`, `GOOGLE_REGION`, `GOOGLE_ZONE`, `OCI_REGION`, `OCI_COMPARTMENT_ID`, `AZURE_LOCATION` and `AZURE_SUBSCRIPTION_ID`, as for the agent.
 
-Releases of this repository are its git tags and GitHub releases; they are also published to [entigo-infralib-example-release](https://github.com/entigolabs/entigo-infralib-example-release), the way entigo-infralib releases go to entigo-infralib-release, to exercise that optional path. OCI publishing follows.
+Releases of this repository are its git tags and GitHub releases; they are also published to [entigo-infralib-example-release](https://github.com/entigolabs/entigo-infralib-example-release), the way entigo-infralib releases go to entigo-infralib-release, to exercise that optional path, and as OCI packages to `ghcr.io/entigolabs/entigo-infralib-example-release`, mirrored to `public.ecr.aws/entigolabs/entigo-infralib-example-release`.
 
 ## Layout
 
